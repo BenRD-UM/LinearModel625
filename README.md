@@ -5,6 +5,9 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/BenRD-UM/LinearModel625/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/BenRD-UM/LinearModel625/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/BenRD-UM/LinearModel625/graph/badge.svg)](https://app.codecov.io/gh/BenRD-UM/LinearModel625)
 <!-- badges: end -->
 
 The goal of LinearModel625 is to …
@@ -23,6 +26,11 @@ This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(LinearModel625)
+#> 
+#> Attaching package: 'LinearModel625'
+#> The following object is masked from 'package:stats':
+#> 
+#>     lm
 ## basic example code
 ```
 

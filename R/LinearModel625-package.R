@@ -2,7 +2,8 @@
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @useDynLib LinearModel625, .registration = TRUE
+#' @import RcppEigen
 #' @importFrom Rcpp sourceCpp
+#' @useDynLib LinearModel625, .registration = TRUE
 ## usethis namespace: end
 NULL
