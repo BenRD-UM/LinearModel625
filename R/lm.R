@@ -44,10 +44,14 @@ lm <- function(formula, data, model = TRUE, x = FALSE, y = FALSE) {
   # we need a to use the stats generics with a formula to construct a model matrix
   # which we can do with model terms and model frame that can be derived with generics
   # from formula
-  model_frame <- model.frame(formula, data = data, na.action = na.omit)
+  model_frame <- stats::model.frame(
+    formula,
+    data = data,
+    na.action = stats::na.omit
+  )
   terms <- attr(model_frame, "terms")
-  mr <- model.response(model_frame, "numeric")
-  mm <- model.matrix(terms, model_frame)
+  mr <- stats::model.response(model_frame, "numeric")
+  mm <- stats::model.matrix(terms, model_frame)
 
   fit <- qrDecomp(mm, mr)
 

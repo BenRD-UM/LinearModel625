@@ -32,6 +32,10 @@ You can install the development version of LinearModel625 like so:
 
 ``` r
 remotes::install_github("BenRD-UM/LinearModel625")
+
+# To view vignettes
+remotes::install_github("BenRD-UM/LinearModel625", build_vignettes)
+browse_vignettes("LinearModel625")
 ```
 
 ## Example
@@ -68,4 +72,4 @@ coef(stats::lm(y~., data = sim_df))
 ```
 
 I did not match the lm class directly, so integration with summary() and anova()
-is not implemented. See the [benchmark vignette](vignettes/benchmarks.html) for more details.
+is not implemented. See the [benchmark vignette](vignettes/benchmarks.Rmd) for more details.
