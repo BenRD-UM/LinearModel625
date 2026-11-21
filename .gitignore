@@ -57,3 +57,4 @@ src/*.dll
 # personal ignores
 extra/
 .session
+inst/doc

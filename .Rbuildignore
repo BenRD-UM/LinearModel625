@@ -6,3 +6,4 @@
 ^codecov\.yml$
 ^flake\.nix$
 ^flake\.lock$
+^data-raw$

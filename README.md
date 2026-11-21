@@ -10,19 +10,24 @@
 coverage](https://codecov.io/gh/BenRD-UM/LinearModel625/graph/badge.svg)](https://app.codecov.io/gh/BenRD-UM/LinearModel625)
 <!-- badges: end -->
 
-The goal of LinearModel625 is to …
+The goal of LinearModel625 is to replicate the basic working of the base
+linear model function in R, stats::lm(). I wanted to learn about QR
+decomposition and try and implement it with R C++ integration. I had
+heard about the Eigen library for C++ while looking at other packages
+and wanted to see if I could use it for this homework.
 
 ## Installation
 
 You can install the development version of LinearModel625 like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+remotes::install_github("BenRD-UM/LinearModel625")
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+You can run LinearModel625::lm() exactly the same way as stats::lm() for
+basic use cases
 
 ``` r
 library(LinearModel625)
@@ -32,28 +37,36 @@ library(LinearModel625)
 #> 
 #>     lm
 ## basic example code
+set.seed(123)
+n <- 1000
+x1 <- rnorm(n, 3, 1)
+x2 <- rnorm(n, 10, 3)
+eps <- rnorm(n, 0, 1)
+y <- 2 + 0.7 * x1 + 0.35 * x2 + eps
+sim_df <- data.frame(y = y, var1 = x1, var2 = x2)
+
+# If we have some data that is generated with a clear relationship how does the
+# linear model look
+
+mod_625 <- lm(y~.,sim_df)
+
+coef(mod_625)
+#> (Intercept)        var1        var2 
+#>   1.9518512   0.6785085   0.3591689
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
+As we can see it correctly identifies the mean and positive relationship
+of the two covariates. Additionally we can see that it gives the same
+beta estimates to stats::lm().
 
 ``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
+all.equal(coef(mod_625), coef(stats::lm(y~., data = sim_df)))
+#> [1] TRUE
+coef(stats::lm(y~., data = sim_df))
+#> (Intercept)        var1        var2 
+#>   1.9518512   0.6785085   0.3591689
 ```
 
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" alt="" width="100%" />
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
+I did not match the lm class directly, so integration with summary() and
+anova() is not implemented. See the [benchmark
+vignette](vignettes/benchmarks.html) for more details.
