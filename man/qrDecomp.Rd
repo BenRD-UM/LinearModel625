@@ -12,8 +12,16 @@ qrDecomp(X, y)
 \item{y}{the observation of the given outcome variable}
 }
 \value{
-returns the beta vector of the OLS estimate for the given model
+returns the beta vector of the OLS estimate for the given model, the
+rank of the covariate matrix, the pivoted covariate column order, and the R triangular
+matrix from the decomposition.
 }
 \description{
 A method for implementing qr decomposition for solving OLS estimates for linear models.
+}
+\examples{
+# Basic usage for lm QR decomposition
+X <- model.matrix(mpg ~ wt + hp + qsec, data = mtcars)
+y <- mtcars$mpg
+qr <- qrDecomp(X,y)
 }

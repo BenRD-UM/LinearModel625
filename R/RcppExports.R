@@ -7,7 +7,14 @@
 #'
 #' @param X the covariate matrix
 #' @param y the observation of the given outcome variable
-#' @return returns the beta vector of the OLS estimate for the given model
+#' @return returns the beta vector of the OLS estimate for the given model, the
+#' rank of the covariate matrix, the pivoted covariate column order, and the R triangular
+#' matrix from the decomposition.
+#' @examples
+#' # Basic usage for lm QR decomposition
+#' X <- model.matrix(mpg ~ wt + hp + qsec, data = mtcars)
+#' y <- mtcars$mpg
+#' qr <- qrDecomp(X,y)
 #' @export
 qrDecomp <- function(X, y) {
     .Call(`_LinearModel625_qrDecomp`, X, y)

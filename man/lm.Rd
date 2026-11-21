@@ -4,10 +4,10 @@
 \alias{lm}
 \title{Simplified Linear Model}
 \usage{
-lm(formula, data, model = TRUE, x, y)
+lm(formula, data, model = TRUE, x = FALSE, y = FALSE)
 }
 \arguments{
-\item{formula}{an object of class formula representing the model to be fitted.}
+\item{formula}{an object of class formula representing the model to be fitted or something coercible into class formula.}
 
 \item{data}{an optional data frame, list or environment containing the variables in the model. Not required if the variables to be used can be found in the environment attached to the formula.}
 
@@ -16,24 +16,30 @@ lm(formula, data, model = TRUE, x, y)
 \value{
 Returns a list of the following model components:
 \itemize{
-\item \code{coefficients}
-\item \code{residuals}
-\item \code{fitted.values}
-\item \code{rank}
-\item \code{df.residual}
-\item \code{terms}
-\item \code{xlevels}
-\item \code{y}
-\item \code{x}
-\item \code{model}
+\item \code{coefficients} the beta matrix for the linear model.
+\item \code{residuals} the residuals, y_i - y_hat.
+\item \code{fitted.values} the fitted mean values, y_hat.
+\item \code{rank} the rank of the fitted linear model.
+\item \code{df.residual} the residual degrees of freedom.
+\item \code{terms} the stats model.frame attribute terms object used.
+\item \code{y} if requested, the response used.
+\item \code{x} if requested, the covariate matrix used.
+\item \code{R} the R matrix of the QR decomposition for calculating SE.
+\item \code{pivot} the pivot matrix used in QR decomposition.
+\item \code{model} if requested the model frame used.
 }
 }
 \description{
 Simplified Linear Model
 }
 \examples{
-# Basic Usage
-# lm(y~x)
-# placeholder
-a <- 2+2
+# Basic Usage: model of outcome y using all covariates
+set.seed(123)
+n <- 1000
+x1 <- rnorm(n, 3, 1)
+x2 <- rnorm(n, 10, 3)
+eps <- rnorm(n, 0, 1)
+y <- 2 + 0.7 * x1 + 0.35 * x2 + eps
+sim_df <- data.frame(y = y, var1 = x1, var2 = x2)
+mod <- lm(y ~ ., sim_df)
 }
