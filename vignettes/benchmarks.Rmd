@@ -1,0 +1,142 @@
+---
+title: "Benchmarking versus base R's linear model stats::lm()"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Benchmarking versus base R's linear model stats::lm()}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(LinearModel625)
+library(bench)
+library(dplyr)
+library(tidyr)
+```
+
+## Simple Profile
+
+We can examine the run time and memory profile of my implementation of the linear
+model vs stats::lm() using the library bench and the following small simulated dataset.
+
+```{r basic_sim}
+set.seed(123)
+n <- 1000
+x1 <- rnorm(n, 3, 1)
+x2 <- rnorm(n, 10, 3)
+eps <- rnorm(n, 0, 1)
+y <- 2 + 0.7 * x1 + 0.35 * x2 + eps
+sim_df <- data.frame(y = y, var1 = x1, var2 = x2)
+  
+same_coef <- function(a, b) isTRUE(all.equal(unname(coef(a)), unname(coef(b))))
+
+results <- bench::mark(
+  mod_625 <- lm(y~.,sim_df),
+  mod_stats <- stats::lm(y~.,sim_df),
+  check = same_coef
+)
+
+print(results)
+
+```
+
+As expected because both methods use optimize QR decomposition as their main mathematical
+function calls we could expect them to perform similarly. We can see that this is
+true for both memory allocation and total_time for this very simple benchmark. My
+tests are meant to check whether these two methods produce the same estimates for
+their beta matrices but we can also show here that they produce the same coefficients
+vector.
+
+The two outputs have slightly different structures as my QR decomposition returns
+the R matrix while stats::lm() layers the a qr object within the S3 lm object
+I wanted same performance on solution not an exact replica of stats::lm()'s
+object oriented structure as I felt that would be outside the scope of this homework.
+However, we can see that the main outputs of a linear model fit are all the same
+between my method and stats::lm().
+
+```{r}
+
+coef(mod_625) == coef(mod_stats)
+
+# all of these pieces between the models also match
+all(mod_stats$residuals == mod_625$residuals)
+all(mod_stats$fitted.values == mod_625$fitted.values)
+all(mod_stats$rank == mod_625$rank)
+all(mod_stats$df.residual == mod_625$df.residual)
+all(mod_stats$terms == mod_625$terms)
+all(mod_stats$model == mod_625$model)
+
+```
+
+## A Heavier Benchmark
+
+We could do a more thorough testing with a function to repeatedly generate random
+data and try to fit that.
+
+```{r bench_press, eval=FALSE}
+# data generated outside of package build on an AMD Ryzen 5 5600G
+# this is the simulation used to create benchmark_results.rds
+
+sim_data <- function(n, p, seed) {
+  set.seed(seed)
+  X <- matrix(rnorm(n * p), n, p, dimnames = list(NULL, paste0("x", seq_len(p))))
+  data.frame(y = drop(X %*% rnorm(p)) + rnorm(n), X)
+}
+
+# we can also show that they return the same estimates for all of this data
+same_coef <- function(a, b) isTRUE(all.equal(unname(coef(a)), unname(coef(b))))
+
+# bench::press() allows us to aggregate the data across runs with different parameters
+# of bench::mark()
+# here we check across a factorial design of 3 sample sizes and a set of 5 or 20 
+# random covariates
+results <- bench::press(
+  n    = c(1e2, 1e3, 1e4),
+  p    = c(5, 20),
+  seed = 123:128,
+  {
+    df <- sim_data(n, p, seed)
+    
+    # generate the random data sets and then time them
+    bench::mark(
+      lm_625  = lm(y ~ ., data = df),
+      stats = stats::lm(y ~ ., data = df),
+      check = same_coef,
+      min_iterations = 10
+    )
+  }
+)
+
+```
+
+```{r bench_load, echo=FALSE}
+results <- readRDS("benchmark_results.rds")
+```
+
+```{r bench_viz}
+# Aggregate across the seeds: median of the per-dataset medians
+results |>
+  dplyr::mutate(expr = as.character(expression)) |>
+  dplyr::group_by(n, p, expr) |> 
+  dplyr::summarise(
+    median_ms = median(as.numeric(median)) * 1000,
+    mem_MB    = median(as.numeric(mem_alloc)),
+    .groups = "drop"
+  ) |>
+  tidyr::pivot_wider(names_from = expr, values_from = c(median_ms, mem_MB))
+
+```
+
+We can see that my function seems to be performing on par with stats::lm() for low
+to medium sample size parameter combinations, but it's run time seems to be inflating
+with my larger parameter trials. This would indicate to me that I have something
+in my lm.R code that could be optimized by transitioning it into the qr decomposition
+function. However, I think it is overall a succesfull test in generating a useable
+package.
